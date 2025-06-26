@@ -58,4 +58,4 @@ jobs:
           app-name: 'outliers-app'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F119D8F8CF1145478D55FDA27FD23383 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_26E544C8E07E4C02B393FC089B68C11C }}
