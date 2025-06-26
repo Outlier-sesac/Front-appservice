@@ -1,0 +1,141 @@
+# Azure DevOps 파이프라인
+
+trigger:
+- main
+
+variables:
+  buildConfiguration: 'Release'
+  azureSubscription: 'your-azure-subscription'
+  resourceGroup: 'assembly-monitor-rg'
+  frontendAppName: 'assembly-monitor-frontend'
+  backendVmName: 'assembly-backend-vm'
+  gpuVmName: 'assembly-gpu-vm'
+
+stages:
+- stage: Build
+  displayName: 'Build stage'
+  jobs:
+  - job: BuildFrontend
+    displayName: 'Build Frontend'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '18.x'
+      displayName: 'Install Node.js'
+
+    - script: |
+        npm ci
+        npm run build
+      displayName: 'npm install and build'
+
+    - task: ArchiveFiles@2
+      inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/frontend-$(Build.BuildId).zip'
+        replaceExistingArchive: true
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'frontend'
+
+  - job: BuildBackend
+    displayName: 'Build Backend'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: Docker@2
+      displayName: 'Build Backend Docker Image'
+      inputs:
+        command: 'build'
+        dockerfile: 'backend/Dockerfile'
+        tags: 'assembly-backend:$(Build.BuildId)'
+
+    - task: Docker@2
+      displayName: 'Build Chatbot Docker Image'
+      inputs:
+        command: 'build'
+        dockerfile: 'chatbot/Dockerfile'
+        tags: 'assembly-chatbot:$(Build.BuildId)'
+
+- stage: Deploy
+  displayName: 'Deploy stage'
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - deployment: DeployFrontend
+    displayName: 'Deploy Frontend'
+    environment: 'production'
+    pool:
+      vmImage: 'ubuntu-latest'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: '$(azureSubscription)'
+              appType: 'webAppLinux'
+              appName: '$(frontendAppName)'
+              package: '$(Pipeline.Workspace)/frontend/frontend-$(Build.BuildId).zip'
+              runtimeStack: 'NODE|18-lts'
+
+  - deployment: DeployBackend
+    displayName: 'Deploy Backend'
+    environment: 'production'
+    pool:
+      vmImage: 'ubuntu-latest'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureCLI@2
+            displayName: 'Deploy to Backend VM'
+            inputs:
+              azureSubscription: '$(azureSubscription)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                # VM IP 가져오기
+                VM_IP=$(az vm show -d --resource-group $(resourceGroup) --name $(backendVmName) --query publicIps -o tsv)
+                
+                # SSH를 통해 배포
+                ssh -o StrictHostKeyChecking=no azureuser@$VM_IP << 'EOF'
+                cd assembly-monitor
+                git pull origin main
+                docker-compose down backend
+                docker-compose build backend
+                docker-compose up -d backend
+                EOF
+
+  - deployment: DeployChatbot
+    displayName: 'Deploy Chatbot'
+    environment: 'production'
+    pool:
+      vmImage: 'ubuntu-latest'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureCLI@2
+            displayName: 'Deploy to GPU VM'
+            inputs:
+              azureSubscription: '$(azureSubscription)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                # GPU VM IP 가져오기
+                GPU_VM_IP=$(az vm show -d --resource-group $(resourceGroup) --name $(gpuVmName) --query publicIps -o tsv)
+                
+                # SSH를 통해 배포
+                ssh -o StrictHostKeyChecking=no azureuser@$GPU_VM_IP << 'EOF'
+                cd assembly-monitor
+                git pull origin main
+                docker-compose down chatbot
+                docker-compose build chatbot
+                docker-compose up -d chatbot
+                EOF
