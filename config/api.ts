@@ -112,7 +112,7 @@ export class ApiClient {
 
   // 군집화 결과 조회 (백엔드 파이썬에서 미리 계산된 결과를 DB에서)
   async getClusteringResults() {
-    return this.get("/clustering/results")
+    return this.get("/api/clusters")
   }
 
   // 이슈별 분석 (DB에서)
