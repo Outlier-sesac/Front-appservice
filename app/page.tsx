@@ -169,27 +169,41 @@ export default function HomePage() {
             </Link>
 
             {/* 챗봇으로 질문하기 */}
-            <Link href="/chatbot">
-              <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
-                <CardHeader>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                      <MessageSquare className="w-6 h-6 text-red-600" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg">챗봇으로 질문</CardTitle>
-                      <CardDescription>AI 기반 질의응답</CardDescription>
-                    </div>
+            <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                    <MessageSquare className="w-6 h-6 text-red-600" />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600">
-                    국회 회의록과 표결 기록을 바탕으로 궁금한 점을 자연어로 질문하세요.
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
+                  <div>
+                    <CardTitle className="text-lg">챗봇으로 질문</CardTitle>
+                    <CardDescription>AI 기반 질의응답</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600">
+                  국회 회의록과 표결 기록을 바탕으로 궁금한 점을 자연어로 질문하세요.
+                </p>
+                <div className="mt-4 text-center">
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="text-xs px-2 py-1 h-auto"
+                  >
+                    <a
+                      href="https://outlier.koreacentral.cloudapp.azure.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      챗봇으로 질문
+                    </a>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
+          
             {/* 통계 대시보드 */}
             <Link href="/statistics">
               <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
@@ -219,10 +233,22 @@ export default function HomePage() {
                       <span className="font-semibold">김○○</span>
                     </div>
                     <div className="mt-4 text-center">
-                      <Badge variant="outline" className="text-xs">
-                        군집화 분석 보기
-                      </Badge>
+                      <Button
+                        asChild
+                        variant="outline"
+                        className="text-xs px-2 py-1 h-auto"
+                      >
+                        <a
+                          href="http://20.249.220.60:8505/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          군집화 분석 보기
+                        </a>
+                      </Button>
                     </div>
+                   
+
                   </div>
                 </CardContent>
               </Card>

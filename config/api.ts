@@ -112,13 +112,23 @@ export class ApiClient {
 
   // 군집화 결과 조회 (백엔드 파이썬에서 미리 계산된 결과를 DB에서)
   async getClusteringResults() {
-    return this.get("/clustering/results")
+    console.log("[API CALL] GET", `${this.baseUrl}/api/clusters`); // 로그 추가
+    return this.get("/api/clusters")
   }
 
   // 이슈별 분석 (DB에서)
   async getIssueAnalysis(keyword: string) {
     return this.get(`/issues/analysis?keyword=${encodeURIComponent(keyword)}`)
   }
+
+  
+  // Ping 테스트 (API 연결 확인용)
+  async ping() {
+    return this.get("/ping")
+  }
+
 }
+
+
 
 export const apiClient = new ApiClient()
