@@ -120,6 +120,15 @@ export class ApiClient {
   async getIssueAnalysis(keyword: string) {
     return this.get(`/issues/analysis?keyword=${encodeURIComponent(keyword)}`)
   }
+
+  
+  // Ping 테스트 (API 연결 확인용)
+  async ping() {
+    return this.get("/ping")
+  }
+
 }
+
+
 
 export const apiClient = new ApiClient()
