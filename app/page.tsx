@@ -239,7 +239,7 @@ export default function HomePage() {
                         className="text-xs px-2 py-1 h-auto"
                       >
                         <a
-                          href="http://20.249.220.60:8505/"
+                          href="https://outlier-profile.koreacentral.cloudapp.azure.com/"
                           target="_blank"
                           rel="noopener noreferrer"
                         >
